@@ -99,7 +99,7 @@ typedef enum __attr_packed___
   TOK_OPEN_PAREN, // (
   TOK_CLOSE_PAREN, //)
   TOK_OPEN_SQUARE, // [
-  TOK_CLOSE_SQUARE, // [
+  TOK_CLOSE_SQUARE, // ]
 
   TOK_DOT, // .
   TOK_SEMICOLON, // ;
@@ -152,6 +152,7 @@ typedef enum __attr_packed___
   TOK_DIV, // /
   TOK_DIV_EQ, // /=
   TOK_EMPTY,
+  TOK_REGEXP, // RegularExpressionLiteral (/.../gim)
 } token_type;
 
 typedef size_t locus;
