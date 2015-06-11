@@ -39,6 +39,7 @@ ecma_assert_object_type_is_valid (ecma_object_type_t type) /**< object's impleme
 {
   JERRY_ASSERT (type == ECMA_OBJECT_TYPE_GENERAL
                 || type == ECMA_OBJECT_TYPE_ARRAY
+                || type == ECMA_OBJECT_TYPE_REGEXP
                 || type == ECMA_OBJECT_TYPE_FUNCTION
                 || type == ECMA_OBJECT_TYPE_BOUND_FUNCTION
                 || type == ECMA_OBJECT_TYPE_BUILT_IN_FUNCTION
@@ -71,6 +72,7 @@ ecma_op_object_get (ecma_object_t *obj_p, /**< the object */
   {
     case ECMA_OBJECT_TYPE_GENERAL:
     case ECMA_OBJECT_TYPE_ARRAY:
+    case ECMA_OBJECT_TYPE_REGEXP:
     case ECMA_OBJECT_TYPE_FUNCTION:
     case ECMA_OBJECT_TYPE_BOUND_FUNCTION:
     case ECMA_OBJECT_TYPE_EXTERNAL_FUNCTION:
@@ -112,6 +114,7 @@ ecma_op_object_get_own_property_longpath (ecma_object_t *obj_p, /**< the object 
   {
     case ECMA_OBJECT_TYPE_GENERAL:
     case ECMA_OBJECT_TYPE_ARRAY:
+    case ECMA_OBJECT_TYPE_REGEXP:
     case ECMA_OBJECT_TYPE_FUNCTION:
     case ECMA_OBJECT_TYPE_BOUND_FUNCTION:
     case ECMA_OBJECT_TYPE_EXTERNAL_FUNCTION:
@@ -204,6 +207,7 @@ ecma_op_object_get_property (ecma_object_t *obj_p, /**< the object */
    * {
    *   [ECMA_OBJECT_TYPE_GENERAL]           = &ecma_op_general_object_get_property,
    *   [ECMA_OBJECT_TYPE_ARRAY]             = &ecma_op_general_object_get_property,
+   *   [ECMA_OBJECT_TYPE_REGEXP]            = &ecma_op_general_object_get_property,
    *   [ECMA_OBJECT_TYPE_FUNCTION]          = &ecma_op_general_object_get_property,
    *   [ECMA_OBJECT_TYPE_BOUND_FUNCTION]    = &ecma_op_general_object_get_property,
    *   [ECMA_OBJECT_TYPE_EXTERNAL_FUNCTION] = &ecma_op_general_object_get_property,
@@ -246,6 +250,7 @@ ecma_op_object_put (ecma_object_t *obj_p, /**< the object */
    * {
    *   [ECMA_OBJECT_TYPE_GENERAL]           = &ecma_op_general_object_put,
    *   [ECMA_OBJECT_TYPE_ARRAY]             = &ecma_op_general_object_put,
+   *   [ECMA_OBJECT_TYPE_REGEXP]            = &ecma_op_general_object_put,
    *   [ECMA_OBJECT_TYPE_FUNCTION]          = &ecma_op_general_object_put,
    *   [ECMA_OBJECT_TYPE_BOUND_FUNCTION]    = &ecma_op_general_object_put,
    *   [ECMA_OBJECT_TYPE_EXTERNAL_FUNCTION] = &ecma_op_general_object_put,
@@ -286,6 +291,7 @@ ecma_op_object_can_put (ecma_object_t *obj_p, /**< the object */
    * {
    *   [ECMA_OBJECT_TYPE_GENERAL]           = &ecma_op_general_object_can_put,
    *   [ECMA_OBJECT_TYPE_ARRAY]             = &ecma_op_general_object_can_put,
+   *   [ECMA_OBJECT_TYPE_REGEXP]            = &ecma_op_general_object_can_put,
    *   [ECMA_OBJECT_TYPE_FUNCTION]          = &ecma_op_general_object_can_put,
    *   [ECMA_OBJECT_TYPE_BOUND_FUNCTION]    = &ecma_op_general_object_can_put,
    *   [ECMA_OBJECT_TYPE_EXTERNAL_FUNCTION] = &ecma_op_general_object_can_put,
@@ -325,6 +331,7 @@ ecma_op_object_delete (ecma_object_t *obj_p, /**< the object */
   {
     case ECMA_OBJECT_TYPE_GENERAL:
     case ECMA_OBJECT_TYPE_ARRAY:
+    case ECMA_OBJECT_TYPE_REGEXP:
     case ECMA_OBJECT_TYPE_FUNCTION:
     case ECMA_OBJECT_TYPE_BOUND_FUNCTION:
     case ECMA_OBJECT_TYPE_EXTERNAL_FUNCTION:
@@ -374,6 +381,7 @@ ecma_op_object_default_value (ecma_object_t *obj_p, /**< the object */
    * {
    *   [ECMA_OBJECT_TYPE_GENERAL]           = &ecma_op_general_object_default_value,
    *   [ECMA_OBJECT_TYPE_ARRAY]             = &ecma_op_general_object_default_value,
+   *   [ECMA_OBJECT_TYPE_REGEXP]            = &ecma_op_general_object_default_value,
    *   [ECMA_OBJECT_TYPE_FUNCTION]          = &ecma_op_general_object_default_value,
    *   [ECMA_OBJECT_TYPE_BOUND_FUNCTION]    = &ecma_op_general_object_default_value,
    *   [ECMA_OBJECT_TYPE_EXTERNAL_FUNCTION] = &ecma_op_general_object_default_value,
@@ -414,6 +422,7 @@ ecma_op_object_define_own_property (ecma_object_t *obj_p, /**< the object */
   switch (type)
   {
     case ECMA_OBJECT_TYPE_GENERAL:
+    case ECMA_OBJECT_TYPE_REGEXP:
     case ECMA_OBJECT_TYPE_FUNCTION:
     case ECMA_OBJECT_TYPE_BOUND_FUNCTION:
     case ECMA_OBJECT_TYPE_EXTERNAL_FUNCTION:
@@ -467,6 +476,7 @@ ecma_op_object_has_instance (ecma_object_t *obj_p, /**< the object */
   switch (type)
   {
     case ECMA_OBJECT_TYPE_ARRAY:
+    case ECMA_OBJECT_TYPE_REGEXP:
     case ECMA_OBJECT_TYPE_GENERAL:
     case ECMA_OBJECT_TYPE_STRING:
     case ECMA_OBJECT_TYPE_ARGUMENTS:
@@ -523,12 +533,15 @@ ecma_object_get_class_name (ecma_object_t *obj_p) /**< object */
 {
   ecma_object_type_t type = ecma_get_object_type (obj_p);
 
-  /* FIXME: Recognise RegExp builtin. Return RegExp ID rahter than ECMA_MAGIC_STRING_OBJECT_UL */
   switch (type)
   {
     case ECMA_OBJECT_TYPE_ARRAY:
     {
       return ECMA_MAGIC_STRING_ARRAY_UL;
+    }
+    case ECMA_OBJECT_TYPE_REGEXP:
+    {
+      return ECMA_MAGIC_STRING_REGEXP_UL;
     }
     case ECMA_OBJECT_TYPE_STRING:
     {
