@@ -170,7 +170,12 @@ typedef struct
  */
 #define TOKEN_EMPTY_INITIALIZER {0, TOK_EMPTY, 0}
 
+uint32_t hex_to_int (char hex);
+
 void lexer_init (const char *, size_t, bool);
+void lexer_init_source (const char *, size_t);
+
+void lexer_free (void);
 
 token lexer_next_token (void);
 void lexer_save_token (token);

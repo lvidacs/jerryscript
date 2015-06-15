@@ -16,33 +16,35 @@
 var r;
 
 // Simple test cases
-r = new RegExp ("(?:)");
-assert (r.exec ("a") == "");
+r = new RegExp ("()");
+assert (r.exec ("a") == ",");
 
-r = new RegExp ("(?:a)");
-assert (r.exec ("a") == "a");
+r = new RegExp ("(a)");
+assert (r.exec ("a") == "a,a");
 
-r = new RegExp ("(?:(?:a)b)c");
-assert (r.exec ("abc") == "abc");
+r = new RegExp ("((a)b)c");
+assert (r.exec ("abc") == "abc,ab,a");
 
-r = new RegExp ("(?:a)*");
-assert (r.exec ("b") == "");
-assert (r.exec ("aaaa") == "aaaa");
+r = new RegExp ("(a)*");
+assert (r.exec ("b")[0] == "");
+assert (r.exec ("b")[1] == undefined);
+assert (r.exec ("aaaa") == "aaaa,a");
 
-r = new RegExp ("(?:a)+");
-assert (r.exec ("aaaa") == "aaaa");
+r = new RegExp ("(a)+");
+assert (r.exec ("aaaa") == "aaaa,a");
 
-r = new RegExp ("(?:a){4}");
-assert (r.exec ("aaaa") == "aaaa");
+r = new RegExp ("(a){4}");
+assert (r.exec ("aaaa") == "aaaa,a");
 
-r = new RegExp ("(?:a){1,2}");
-assert (r.exec ("a") == "a");
-assert (r.exec ("aa") == "aa");
-assert (r.exec ("aaaa") == "aa");
+r = new RegExp ("(a){1,2}");
+assert (r.exec ("a") == "a,a");
+assert (r.exec ("aa") == "aa,a");
+assert (r.exec ("aaaa") == "aa,a");
 
-r = new RegExp ("(?:a)?");
-assert (r.exec ("a") == "a");
-assert (r.exec ("b") == "");
+r = new RegExp ("(a)?");
+assert (r.exec ("a") == "a,a");
+assert (r.exec ("b")[0] == "");
+assert (r.exec ("b")[1] == undefined);
 
 // Test greedy iterations
 // FIXME: Add testcases

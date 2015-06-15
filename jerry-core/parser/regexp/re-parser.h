@@ -23,30 +23,28 @@
 
 typedef uint8_t token_type_t;
 
-#define RE_TOK_EOF                            0
-#define RE_TOK_BACKREFERENCE                  1
-#define RE_TOK_CHAR                           2
-#define RE_TOK_RE_START                       3
-#define RE_TOK_RE_END                         4
-#define RE_TOK_ALTERNATIVE                    5
-#define RE_TOK_ASSERT_START                   6
-#define RE_TOK_ASSERT_END                     7
-#define RE_TOK_PERIOD                         8
-#define RE_TOK_START_CAPTURE_GROUP            9
-#define RE_TOK_START_NON_CAPTURE_GROUP       10
-#define RE_TOK_END_GROUP                     11
-#define RE_TOK_ASSERT_START_POS_LOOKAHEAD    12
-#define RE_TOK_ASSERT_START_NEG_LOOKAHEAD    13
-#define RE_TOK_ASSERT_WORD_BOUNDARY          14
-#define RE_TOK_ASSERT_NOT_WORD_BOUNDARY      15
-#define RE_TOK_DIGIT                         16
-#define RE_TOK_NOT_DIGIT                     17
-#define RE_TOK_WHITE                         18
-#define RE_TOK_NOT_WHITE                     19
-#define RE_TOK_WORD_CHAR                     20
-#define RE_TOK_NOT_WORD_CHAR                 21
-#define RE_TOK_START_CHAR_CLASS              22
-#define RE_TOK_START_INV_CHAR_CLASS          23
+#define RE_TOK_EOF                            0 /* EOF */
+#define RE_TOK_BACKREFERENCE                  1 /* \[0..9] */
+#define RE_TOK_CHAR                           2 /* any character */
+#define RE_TOK_ALTERNATIVE                    3 /* | */
+#define RE_TOK_ASSERT_START                   4 /* ^ */
+#define RE_TOK_ASSERT_END                     5 /* $ */
+#define RE_TOK_PERIOD                         6 /* . */
+#define RE_TOK_START_CAPTURE_GROUP            7 /* ( */
+#define RE_TOK_START_NON_CAPTURE_GROUP        8 /* (?: */
+#define RE_TOK_END_GROUP                      9 /* ')' */
+#define RE_TOK_ASSERT_START_POS_LOOKAHEAD    10 /* (?= */
+#define RE_TOK_ASSERT_START_NEG_LOOKAHEAD    11 /* (?! */
+#define RE_TOK_ASSERT_WORD_BOUNDARY          12 /* \b */
+#define RE_TOK_ASSERT_NOT_WORD_BOUNDARY      13 /* \B */
+#define RE_TOK_DIGIT                         14 /* \d */
+#define RE_TOK_NOT_DIGIT                     15 /* \D */
+#define RE_TOK_WHITE                         16 /* \s */
+#define RE_TOK_NOT_WHITE                     17 /* \S */
+#define RE_TOK_WORD_CHAR                     18 /* \w */
+#define RE_TOK_NOT_WORD_CHAR                 19 /* \W */
+#define RE_TOK_START_CHAR_CLASS              20 /* [ ] */
+#define RE_TOK_START_INV_CHAR_CLASS          21 /* [^ ] */
 
 #define RE_ITERATOR_INFINITE ((uint32_t)-1)
 #define RE_MAX_RE_DECESC_DIGITS 9
@@ -73,8 +71,8 @@ typedef struct
 
 typedef struct
 {
-  ecma_char_t* pattern_start_p;
-  ecma_char_t* current_char_p;
+  ecma_char_t *pattern_start_p;
+  ecma_char_t *current_char_p;
   int num_of_groups;
   uint32_t num_of_classes;
 } re_parser_ctx_t;
@@ -83,8 +81,9 @@ typedef void (*re_char_class_callback) (void *re_ctx_p, uint32_t start, uint32_t
 
 ecma_completion_value_t
 re_parse_char_class (re_parser_ctx_t *parser_ctx_p,
-                                re_char_class_callback append_char_class,
-                                void *re_ctx_p, re_token_t *out_token_p);
+                     re_char_class_callback append_char_class,
+                     void *re_ctx_p, re_token_t *out_token_p);
+
 ecma_completion_value_t
 re_parse_next_token (re_parser_ctx_t *parser_ctx_p, re_token_t *out_token_p);
 

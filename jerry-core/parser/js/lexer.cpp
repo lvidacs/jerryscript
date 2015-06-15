@@ -347,7 +347,7 @@ consume_char (void)
   } \
   while (0)
 
-static uint32_t
+uint32_t
 hex_to_int (char hex)
 {
   switch (hex)
@@ -1028,7 +1028,6 @@ parse_regexp (void)
     consume_char ();
   }
 
-
   /* Eat up '/' */
   consume_char ();
 
@@ -1038,9 +1037,7 @@ parse_regexp (void)
     ecma_char_t c = (ecma_char_t) LA (0);
 
     if (c == '\0'
-        || c == '.'
-        || c == ')'
-        || c == ';'
+        || !ecma_char_is_word_char (c)
         || ecma_char_is_line_terminator (c))
     {
       break;

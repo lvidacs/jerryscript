@@ -23,7 +23,7 @@
 #include "re-parser.h"
 
 /* RegExp opcodes
- * Group opcode order is important. Do not change it!
+ * Group opcode order is important, because IS_CAPTURE_GROUP is based on it. Do not change it!
  */
 #define RE_OP_EOF                                           0
 
@@ -50,8 +50,8 @@
 #define RE_OP_ASSERT_END                                    20
 #define RE_OP_ASSERT_WORD_BOUNDARY                          21
 #define RE_OP_ASSERT_NOT_WORD_BOUNDARY                      22
-#define RE_OP_LOOKPOS                                       23
-#define RE_OP_LOOKNEG                                       24
+#define RE_OP_LOOKAHEAD_POS                                 23
+#define RE_OP_LOOKAHEAD_NEG                                 24
 #define RE_OP_BACKREFERENCE                                 25
 #define RE_OP_CHAR_CLASS                                    26
 #define RE_OP_INV_CHAR_CLASS                                27
@@ -83,7 +83,7 @@ typedef struct
 } re_compiler_ctx_t;
 
 ecma_completion_value_t
-regexp_compile_bytecode (ecma_property_t *bytecode_p, ecma_string_t *pattern_p, uint8_t flags_p);
+regexp_compile_bytecode (ecma_property_t *bytecode_p, ecma_string_t *pattern_str_p, uint8_t flags);
 
 re_opcode_t
 get_opcode (re_bytecode_t **bc_p);

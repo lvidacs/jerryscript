@@ -45,23 +45,17 @@ typedef enum
 } ecma_standard_error_t;
 
 extern ecma_object_t *ecma_new_standard_error (ecma_standard_error_t error_type);
-extern ecma_object_t* ecma_new_standard_error_with_message (ecma_standard_error_t error_type,
+extern ecma_object_t *ecma_new_standard_error_with_message (ecma_standard_error_t error_type,
                                                             ecma_string_t *message_string_p);
-
-#define ERROR_OBJ(ret_value, error_type, msg) \
-  do \
-  { \
-  ecma_string_t *error_msg_p = ecma_new_ecma_string ((const ecma_char_t *) msg); \
-  ecma_object_t *error_obj_p = ecma_new_standard_error_with_message (error_type, error_msg_p); \
-  ecma_deref_ecma_string (error_msg_p); \
-  ret_value = ecma_make_throw_obj_completion_value (error_obj_p); \
-  } while (0)
-
-#define COMMON_ERROR_OBJ(ret_value, msg)  ERROR_OBJ (ret_value, ECMA_ERROR_COMMON, msg)
-#define RANGE_ERROR_OBJ(ret_value, msg)  ERROR_OBJ (ret_value, ECMA_ERROR_RANGE, msg)
-#define REFERENCE_ERROR_OBJ(ret_value, msg)  ERROR_OBJ (ret_value, ECMA_ERROR_REFERENCE, msg)
-#define SYNTAX_ERROR_OBJ(ret_value, msg)  ERROR_OBJ (ret_value, ECMA_ERROR_SYNTAX, msg)
-#define TYPE_ERROR_OBJ(ret_value, msg) ERROR_OBJ (ret_value, ECMA_ERROR_TYPE, msg)
+extern ecma_completion_value_t ecma_raise_standard_error (ecma_standard_error_t error_type,
+                                                          const ecma_char_t *msg_p);
+extern ecma_completion_value_t ecma_raise_common_error (const ecma_char_t *msg_p);
+extern ecma_completion_value_t ecma_raise_eval_error (const ecma_char_t *msg_p);
+extern ecma_completion_value_t ecma_raise_range_error (const ecma_char_t *msg_p);
+extern ecma_completion_value_t ecma_raise_reference_error (const ecma_char_t *msg_p);
+extern ecma_completion_value_t ecma_raise_syntax_error (const ecma_char_t *msg_p);
+extern ecma_completion_value_t ecma_raise_type_error (const ecma_char_t *msg_p);
+extern ecma_completion_value_t ecma_raise_uri_error (const ecma_char_t *msg_p);
 
 /**
  * @}

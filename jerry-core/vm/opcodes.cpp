@@ -166,13 +166,15 @@ opfunc_assignment (opcode_t opdata, /**< operation data */
   else if (type_value_right == OPCODE_ARG_TYPE_REGEXP)
   {
 #ifndef CONFIG_ECMA_COMPACT_PROFILE_DISABLE_REGEXP_BUILTIN
-    lit_cpointer_t lit_cp = serializer_get_literal_cp_by_uid (src_val_descr, int_data->opcodes_p, int_data->pos);
+    lit_cpointer_t lit_cp = serializer_get_literal_cp_by_uid (src_val_descr,
+                                                              int_data->opcodes_p,
+                                                              int_data->pos);
     ecma_string_t *string_p = ecma_new_ecma_string_from_lit_cp (lit_cp);
 
-    int32_t chars = ecma_string_get_length (string_p);
-    MEM_DEFINE_LOCAL_ARRAY (re_str_p, chars + 1, ecma_char_t);
+    int32_t re_str_len = ecma_string_get_length (string_p);
+    MEM_DEFINE_LOCAL_ARRAY (re_str_p, re_str_len + 1, ecma_char_t);
 
-    ssize_t zt_str_size = (ssize_t) sizeof (ecma_char_t) * (chars + 1);
+    ssize_t zt_str_size = (ssize_t) sizeof (ecma_char_t) * (re_str_len + 1);
     ecma_string_to_zt_string (string_p, re_str_p, zt_str_size);
 
     ecma_char_t *ch_p = re_str_p;
@@ -194,7 +196,7 @@ opfunc_assignment (opcode_t opdata, /**< operation data */
 
     if ((ch_p - last_slash_p) > 1)
     {
-      flags_p = ecma_new_ecma_string (last_slash_p + 1, (ecma_length_t) ((ch_p - last_slash_p + 1)));
+      flags_p = ecma_new_ecma_string (last_slash_p + 1, (ecma_length_t) ((ch_p - last_slash_p - 1)));
     }
 
     ECMA_TRY_CATCH (regexp_obj_value,

@@ -19,6 +19,7 @@
 #include "ecma-helpers.h"
 #include "ecma-try-catch-macro.h"
 #include "jrt-libc-includes.h"
+#include "lexer.h"
 #include "re-parser.h"
 #include "syntax-errors.h"
 
@@ -27,47 +28,19 @@
 #define RE_LOOKUP(str_p, lookup)  *(str_p + lookup)
 #define RE_ADVANCE(str_p, advance) do { str_p += advance; } while (0)
 
-static uint32_t
-hex_to_int (ecma_char_t hex)
-{
-  switch (hex)
-  {
-    case '0': return 0x0;
-    case '1': return 0x1;
-    case '2': return 0x2;
-    case '3': return 0x3;
-    case '4': return 0x4;
-    case '5': return 0x5;
-    case '6': return 0x6;
-    case '7': return 0x7;
-    case '8': return 0x8;
-    case '9': return 0x9;
-    case 'a':
-    case 'A': return 0xA;
-    case 'b':
-    case 'B': return 0xB;
-    case 'c':
-    case 'C': return 0xC;
-    case 'd':
-    case 'D': return 0xD;
-    case 'e':
-    case 'E': return 0xE;
-    case 'f':
-    case 'F': return 0xF;
-    default: JERRY_UNREACHABLE ();
-  }
-}
-
 static ecma_char_t
 get_ecma_char (ecma_char_t** char_p)
 {
   ecma_char_t ch = **char_p;
   RE_ADVANCE (*char_p, 1);
   return ch;
-}
+} /* get_ecma_char */
 
 /**
  * Parse RegExp iterators
+ *
+ * @return completion value
+ *         Returned value must be freed with ecma_free_completion_value
  */
 static ecma_completion_value_t
 parse_re_iterator (ecma_char_t *pattern_p, /**< RegExp pattern */
@@ -76,10 +49,6 @@ parse_re_iterator (ecma_char_t *pattern_p, /**< RegExp pattern */
                    uint32_t *advance_p) /**< output length of current advance */
 {
   ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
-
-  re_token_p->qmin = 1;
-  re_token_p->qmax = 1;
-  re_token_p->greedy = true;
 
   ecma_char_t ch0 = RE_LOOKUP (pattern_p, lookup);
   ecma_char_t ch1 = RE_LOOKUP (pattern_p, lookup + 1);
@@ -148,24 +117,24 @@ parse_re_iterator (ecma_char_t *pattern_p, /**< RegExp pattern */
         {
           if (digits >= ECMA_NUMBER_MAX_DIGITS)
           {
-            SYNTAX_ERROR_OBJ (ret_value, "RegExp quantifier error: too many digits.");
+            ret_value = ecma_raise_syntax_error ((const ecma_char_t *) "RegExp quantifier error: too many digits.");
             return ret_value;
           }
           digits++;
-          qmin = qmin * 10 + hex_to_int (ch1);
+          qmin = qmin * 10 + hex_to_int ((char) ch1);
         }
         else if (ch1 == ',')
         {
           if (qmax != RE_ITERATOR_INFINITE)
           {
-            SYNTAX_ERROR_OBJ (ret_value, "RegExp quantifier error: double comma.");
+            ret_value = ecma_raise_syntax_error ((const ecma_char_t *) "RegExp quantifier error: double comma.");
             return ret_value;
           }
           if ((RE_LOOKUP (pattern_p, lookup + *advance_p + 1)) == '}')
           {
             if (digits == 0)
             {
-              SYNTAX_ERROR_OBJ (ret_value, "RegExp quantifier error: missing digits.");
+              ret_value = ecma_raise_syntax_error ((const ecma_char_t *) "RegExp quantifier error: missing digits.");
               return ret_value;
             }
 
@@ -182,7 +151,7 @@ parse_re_iterator (ecma_char_t *pattern_p, /**< RegExp pattern */
         {
           if (digits == 0)
           {
-            SYNTAX_ERROR_OBJ (ret_value, "RegExp quantifier error: missing digits.");
+            ret_value = ecma_raise_syntax_error ((const ecma_char_t *) "RegExp quantifier error: missing digits.");
             return ret_value;
           }
 
@@ -202,7 +171,7 @@ parse_re_iterator (ecma_char_t *pattern_p, /**< RegExp pattern */
         }
         else
         {
-          SYNTAX_ERROR_OBJ (ret_value, "RegExp quantifier error: unknown char.");
+          ret_value = ecma_raise_syntax_error ((const ecma_char_t *) "RegExp quantifier error: unknown char.");
           return ret_value;
         }
       }
@@ -221,17 +190,24 @@ parse_re_iterator (ecma_char_t *pattern_p, /**< RegExp pattern */
       JERRY_UNREACHABLE ();
       break;
     }
+    default:
+    {
+      re_token_p->qmin = 1;
+      re_token_p->qmax = 1;
+      re_token_p->greedy = true;
+      break;
+    }
   }
 
   JERRY_ASSERT (ecma_is_completion_value_empty (ret_value));
 
   if (re_token_p->qmin > re_token_p->qmax)
   {
-    SYNTAX_ERROR_OBJ (ret_value, "RegExp quantifier error: qmin > qmax.");
+    ret_value = ecma_raise_syntax_error ((const ecma_char_t *) "RegExp quantifier error: qmin > qmax.");
   }
 
   return ret_value;
-}
+} /* parse_re_iterator */
 
 /**
  * Count the number of groups in pattern
@@ -279,17 +255,18 @@ re_count_num_of_groups (re_parser_ctx_t *parser_ctx_p) /**< RegExp parser contex
       }
     }
   }
-}
+} /* re_count_num_of_groups */
 
 /**
  * Read the input pattern and parse the range of character class
  *
- * @return current parsed token
+ * @return completion value
+ *         Returned value must be freed with ecma_free_completion_value
  */
 ecma_completion_value_t
 re_parse_char_class (re_parser_ctx_t *parser_ctx_p, /**< number of classes */
                      re_char_class_callback append_char_class, /**< callback function,
-                                                                *   which add the char-ranges
+                                                                *   which adds the char-ranges
                                                                 *   to the bytecode */
                      void* re_ctx_p, /**< regexp compiler context */
                      re_token_t *out_token_p) /**< output token */
@@ -358,7 +335,7 @@ re_parse_char_class (re_parser_ctx_t *parser_ctx_p, /**< number of classes */
         }
         else
         {
-          SYNTAX_ERROR_OBJ (ret_value, "invalid regexp control escape");
+          ret_value = ecma_raise_syntax_error ((const ecma_char_t *) "invalid regexp control escape");
           return ret_value;
         }
       }
@@ -453,7 +430,7 @@ re_parse_char_class (re_parser_ctx_t *parser_ctx_p, /**< number of classes */
       {
         if (is_range)
         {
-          SYNTAX_ERROR_OBJ (ret_value, "invalid character class range");
+          ret_value = ecma_raise_syntax_error ((const ecma_char_t *) "invalid character class range");
           return ret_value;
         }
         else
@@ -471,7 +448,7 @@ re_parse_char_class (re_parser_ctx_t *parser_ctx_p, /**< number of classes */
         {
           if (start > ch)
           {
-            SYNTAX_ERROR_OBJ (ret_value, "invalid character class range");
+            ret_value = ecma_raise_syntax_error ((const ecma_char_t *) "invalid character class range");
             return ret_value;
           }
           else
@@ -510,6 +487,9 @@ re_parse_char_class (re_parser_ctx_t *parser_ctx_p, /**< number of classes */
 
 /**
  * Read the input pattern and parse the next token for the RegExp compiler
+ *
+ * @return completion value
+ *         Returned value must be freed with ecma_free_completion_value
  */
 ecma_completion_value_t
 re_parse_next_token (re_parser_ctx_t *parser_ctx_p, /**< RegExp parser context */
@@ -597,7 +577,7 @@ re_parse_next_token (re_parser_ctx_t *parser_ctx_p, /**< RegExp parser context *
         }
         else
         {
-          SYNTAX_ERROR_OBJ (ret_value, "invalid regexp control escape");
+          ret_value = ecma_raise_syntax_error ((const ecma_char_t *) "invalid regexp control escape");
           break;
         }
       }
@@ -657,7 +637,7 @@ re_parse_next_token (re_parser_ctx_t *parser_ctx_p, /**< RegExp parser context *
         {
           if (isdigit (RE_LOOKUP (parser_ctx_p->current_char_p, 2)))
           {
-            SYNTAX_ERROR_OBJ (ret_value, "RegExp escape pattern error.");
+            ret_value = ecma_raise_syntax_error ((const ecma_char_t *) "RegExp escape pattern error.");
             break;
           }
 
@@ -681,7 +661,8 @@ re_parse_next_token (re_parser_ctx_t *parser_ctx_p, /**< RegExp parser context *
             {
               if (index >= RE_MAX_RE_DECESC_DIGITS)
               {
-                SYNTAX_ERROR_OBJ (ret_value, "RegExp escape pattern error: decimal escape too long.");
+                ret_value = ecma_raise_syntax_error ((const ecma_char_t *)
+                                                     "RegExp escape pattern error: decimal escape too long.");
                 return ret_value;
               }
 
@@ -691,7 +672,7 @@ re_parse_next_token (re_parser_ctx_t *parser_ctx_p, /**< RegExp parser context *
               {
                 break;
               }
-              number = number * 10 + hex_to_int (digit);
+              number = number * 10 + hex_to_int ((char) digit);
               index++;
             }
             while (true);

@@ -63,6 +63,28 @@ ecma_char_is_line_terminator (ecma_char_t c) /**< character value */
 } /* ecma_char_is_line_terminator */
 
 /**
+ * Check if specified character is a word character
+ *
+ * See also: ECMA-262 v5, 15.10.2.6
+ *
+ * @return true - if the character is a word character
+ *         false - otherwise.
+ */
+bool
+ecma_char_is_word_char (ecma_char_t c) /**< character value */
+{
+  if ((c >= 'a' && c <= 'z')
+      || (c >= 'A' && c <= 'Z')
+      || (c >= '0' && c <= '9')
+      || c == '_')
+  {
+    return true;
+  }
+
+  return false;
+} /* ecma_char_is_word_char */
+
+/**
  * @}
  * @}
  */
