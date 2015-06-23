@@ -339,7 +339,6 @@ insert_into_group (re_compiler_ctx_t *re_ctx_p, /**< RegExp compiler context */
   }
 } /* insert_into_group */
 
-
 /**
  * Enclose the given bytecode to a group and inster jump value
  */

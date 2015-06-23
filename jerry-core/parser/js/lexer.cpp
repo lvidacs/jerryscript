@@ -1004,14 +1004,17 @@ static token
 parse_regexp (void)
 {
   token result;
+  bool is_char_class = false;
 
   /* Eat up '/' */
+  JERRY_ASSERT ((ecma_char_t) LA (0) == '/');
   consume_char ();
   new_token ();
 
   while (true)
   {
     ecma_char_t c = (ecma_char_t) LA (0);
+
     if (c == '\0')
     {
       PARSE_ERROR ("Unclosed string", token_start - buffer_start);
@@ -1020,16 +1023,27 @@ parse_regexp (void)
     {
       PARSE_ERROR ("RegExp literal shall not contain newline character", token_start - buffer_start);
     }
-    else if (c == '/')
+    else if (c == '\\')
     {
+      consume_char ();
+    }
+    else if (c == '[')
+    {
+      is_char_class = true;
+    }
+    else if (c == ']')
+    {
+      is_char_class = false;
+    }
+    else if (c == '/' && !is_char_class)
+    {
+      /* Eat up '/' */
+      consume_char ();
       break;
     }
 
     consume_char ();
   }
-
-  /* Eat up '/' */
-  consume_char ();
 
   /* Try to parse RegExp flags */
   while (true)
