@@ -19,7 +19,6 @@
 #include "ecma-helpers.h"
 #include "ecma-try-catch-macro.h"
 #include "jrt-libc-includes.h"
-#include "lexer.h"
 #include "re-parser.h"
 #include "syntax-errors.h"
 

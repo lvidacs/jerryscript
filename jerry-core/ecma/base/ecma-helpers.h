@@ -321,7 +321,7 @@ ecma_get_external_pointer_value (ecma_object_t *obj_p,
 extern void
 ecma_free_external_pointer_in_property (ecma_property_t *prop_p);
 
-/* ecma-helpers-conversion.c */
+/* ecma-helpers-conversion.cpp */
 extern ecma_number_t ecma_zt_string_to_number (const ecma_char_t *str_p);
 extern ssize_t ecma_uint32_to_string (uint32_t value, ecma_char_t *out_buffer_p, ssize_t buffer_size);
 extern uint32_t ecma_number_to_uint32 (ecma_number_t value);
@@ -329,6 +329,7 @@ extern int32_t ecma_number_to_int32 (ecma_number_t value);
 extern ecma_number_t ecma_int32_to_number (int32_t value);
 extern ecma_number_t ecma_uint32_to_number (uint32_t value);
 extern ecma_length_t ecma_number_to_zt_string (ecma_number_t num, ecma_char_t *buffer_p, ssize_t buffer_size);
+extern uint32_t hex_to_int (char hex);
 
 /* ecma-helpers-char.cpp */
 extern bool ecma_char_is_new_line (ecma_char_t c);
