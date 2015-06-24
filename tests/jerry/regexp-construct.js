@@ -15,6 +15,12 @@
 
 var r;
 
+r = new RegExp ();
+assert (r.source == "(?:)");
+assert (r.global == false);
+assert (r.ignoreCase == false);
+assert (r.multiline == false);
+
 r = new RegExp ("a");
 assert (r.source == "a");
 assert (r.global == false);
@@ -60,6 +66,12 @@ assert (r2.source == "a");
 assert (r2.global == true);
 assert (r2.ignoreCase == true);
 assert (r2.multiline == true);
+
+r = /(?:)/;
+assert (r.source == "(?:)");
+assert (r.global == false);
+assert (r.ignoreCase == false);
+assert (r.multiline == false);
 
 r = /a/;
 assert (r.source == "a");

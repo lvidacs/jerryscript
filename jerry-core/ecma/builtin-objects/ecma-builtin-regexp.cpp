@@ -65,7 +65,13 @@ ecma_builtin_regexp_dispatch_construct (const ecma_value_t *arguments_list_p, /*
 {
   ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
 
-  if (ecma_is_value_object (arguments_list_p[0])
+  if (arguments_list_len == 0)
+  {
+    ecma_string_t *magic_str_p = ecma_get_magic_string (ECMA_MAGIC_STRING_EMPTY_NON_CAPTURE_GROUP);
+    ret_value = ecma_op_create_regexp_object (magic_str_p, NULL);
+    ecma_deref_ecma_string (magic_str_p);
+  }
+  else if (ecma_is_value_object (arguments_list_p[0])
       && ecma_object_get_class_name (ecma_get_object_from_value (arguments_list_p[0])) == ECMA_MAGIC_STRING_REGEXP_UL)
   {
     if (arguments_list_len == 1
