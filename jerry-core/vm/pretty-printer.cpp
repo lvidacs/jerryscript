@@ -396,7 +396,7 @@ pp_op_meta (const opcode_t *opcodes_p,
             while ((int16_t) start >= 0 && !found)
             {
               start--;
-              switch (serializer_get_opcode (opcodes_p, start).op_idx)
+              switch (serializer_re_get_opcode (opcodes_p, start).op_idx)
               {
                 case NAME_TO_ID (call_n):
                 case NAME_TO_ID (native_call):
@@ -411,7 +411,7 @@ pp_op_meta (const opcode_t *opcodes_p,
                 }
               }
             }
-            opcode_t start_op = serializer_get_opcode (opcodes_p, start);
+            opcode_t start_op = serializer_re_get_opcode (opcodes_p, start);
             switch (start_op.op_idx)
             {
               case NAME_TO_ID (call_n):
@@ -473,7 +473,7 @@ pp_op_meta (const opcode_t *opcodes_p,
             }
             for (opcode_counter_t counter = start; counter <= oc; counter++)
             {
-              opcode_t meta_op = serializer_get_opcode (opcodes_p, counter);
+              opcode_t meta_op = serializer_re_get_opcode (opcodes_p, counter);
 
               switch (meta_op.op_idx)
               {

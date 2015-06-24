@@ -29,10 +29,11 @@
  * @{
  */
 
-#define RE_EXECUTE_RECURSION_LIMIT  1000
-#define RE_EXECUTE_STEPS_LIMIT      10000
+#define RE_EXECUTE_RECURSION_LIMIT  1000  /* Limit of RegExp executor recursion depth */
+#define RE_EXECUTE_MATCH_LIMIT      10000 /* Limit of RegExp execetur matching steps */
 
-typedef struct re_matcher_ctx
+/* represents the context of RegExp executor */
+typedef struct
 {
   const ecma_char_t **saved_p;
   const ecma_char_t *input_start_p;

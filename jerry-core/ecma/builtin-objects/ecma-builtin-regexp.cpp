@@ -64,6 +64,19 @@ ecma_builtin_regexp_dispatch_construct (const ecma_value_t *arguments_list_p, /*
                                         ecma_length_t arguments_list_len) /**< number of arguments */
 {
   ecma_completion_value_t ret_value = ecma_make_empty_completion_value ();
+  ecma_value_t pattern_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_UNDEFINED);
+  ecma_value_t flags_value = ecma_make_simple_value (ECMA_SIMPLE_VALUE_UNDEFINED);
+
+  if (arguments_list_len > 0)
+  {
+    /* pattern string or RegExp object */
+    pattern_value = arguments_list_p[0];
+
+    if (arguments_list_len > 1)
+    {
+      flags_value = arguments_list_p[1];
+    }
+  }
 
   if (arguments_list_len == 0)
   {
@@ -71,13 +84,13 @@ ecma_builtin_regexp_dispatch_construct (const ecma_value_t *arguments_list_p, /*
     ret_value = ecma_op_create_regexp_object (magic_str_p, NULL);
     ecma_deref_ecma_string (magic_str_p);
   }
-  else if (ecma_is_value_object (arguments_list_p[0])
-      && ecma_object_get_class_name (ecma_get_object_from_value (arguments_list_p[0])) == ECMA_MAGIC_STRING_REGEXP_UL)
+  else if (ecma_is_value_object (pattern_value)
+           && ecma_object_get_class_name (ecma_get_object_from_value (pattern_value)) == ECMA_MAGIC_STRING_REGEXP_UL)
   {
     if (arguments_list_len == 1
-        || (arguments_list_len > 1 && ecma_is_value_undefined (arguments_list_p[1])))
+        || (arguments_list_len > 1 && ecma_is_value_undefined (flags_value)))
     {
-      ret_value = ecma_make_normal_completion_value (ecma_copy_value (arguments_list_p[0], true));
+      ret_value = ecma_make_normal_completion_value (ecma_copy_value (pattern_value, true));
     }
     else
     {
@@ -87,7 +100,7 @@ ecma_builtin_regexp_dispatch_construct (const ecma_value_t *arguments_list_p, /*
   else
   {
     ECMA_TRY_CATCH (regexp_str_value,
-                    ecma_op_to_string (arguments_list_p[0]),
+                    ecma_op_to_string (pattern_value),
                     ret_value);
 
     ecma_string_t *pattern_string_p = ecma_get_string_from_value (regexp_str_value);
@@ -97,7 +110,7 @@ ecma_builtin_regexp_dispatch_construct (const ecma_value_t *arguments_list_p, /*
     if (arguments_list_len > 1)
     {
       ECMA_TRY_CATCH (flags_str_value,
-                      ecma_op_to_string (arguments_list_p[1]),
+                      ecma_op_to_string (flags_value),
                       ret_value);
 
       flags_string_p = ecma_copy_or_ref_ecma_string (ecma_get_string_from_value (flags_str_value));

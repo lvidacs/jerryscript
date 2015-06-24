@@ -520,7 +520,7 @@ convert_string_to_token_transform_escape_seq (token_type tok_type, /**< type of 
             JERRY_ASSERT ((char_code & 0xF000u) == 0);
 
             char_code = (uint16_t) (char_code << 4u);
-            char_code = (uint16_t) (char_code + hex_to_int (nc));
+            char_code = (uint16_t) (char_code + ecma_char_hex_to_int (nc));
           }
         }
 
@@ -736,11 +736,11 @@ parse_number (void)
     {
       if (!is_overflow)
       {
-        res = (res << 4) + hex_to_int (token_start[i]);
+        res = (res << 4) + ecma_char_hex_to_int (token_start[i]);
       }
       else
       {
-        fp_res = fp_res * 16 + (ecma_number_t) hex_to_int (token_start[i]);
+        fp_res = fp_res * 16 + (ecma_number_t) ecma_char_hex_to_int (token_start[i]);
       }
 
       if (res > 255)
@@ -854,11 +854,11 @@ parse_number (void)
     {
       if (!is_overflow)
       {
-        res = res * 8 + hex_to_int (token_start[i]);
+        res = res * 8 + ecma_char_hex_to_int (token_start[i]);
       }
       else
       {
-        fp_res = fp_res * 8 + (ecma_number_t) hex_to_int (token_start[i]);
+        fp_res = fp_res * 8 + (ecma_number_t) ecma_char_hex_to_int (token_start[i]);
       }
       if (res > 255)
       {
@@ -874,11 +874,11 @@ parse_number (void)
     {
       if (!is_overflow)
       {
-        res = res * 10 + hex_to_int (token_start[i]);
+        res = res * 10 + ecma_char_hex_to_int (token_start[i]);
       }
       else
       {
-        fp_res = fp_res * 10 + (ecma_number_t) hex_to_int (token_start[i]);
+        fp_res = fp_res * 10 + (ecma_number_t) ecma_char_hex_to_int (token_start[i]);
       }
       if (res > 255)
       {

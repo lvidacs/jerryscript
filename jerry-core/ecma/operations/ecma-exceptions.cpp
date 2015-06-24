@@ -144,7 +144,7 @@ ecma_raise_standard_error (ecma_standard_error_t error_type, /**< error type */
   ecma_object_t *error_obj_p = ecma_new_standard_error_with_message (error_type, error_msg_p);
   ecma_deref_ecma_string (error_msg_p);
   return ecma_make_throw_obj_completion_value (error_obj_p);
-}
+} /* ecma_raise_standard_error */
 
 /**
  * Raise a common error with the given message.
@@ -156,7 +156,7 @@ ecma_completion_value_t
 ecma_raise_common_error (const ecma_char_t *msg_p) /**< error message */
 {
   return ecma_raise_standard_error (ECMA_ERROR_COMMON, msg_p);
-}
+} /* ecma_raise_common_error */
 
 /**
  * Raise an EvalError with the given message.
@@ -170,7 +170,7 @@ ecma_completion_value_t
 ecma_raise_eval_error (const ecma_char_t *msg_p) /**< error message */
 {
   return ecma_raise_standard_error (ECMA_ERROR_EVAL, msg_p);
-}
+} /* ecma_raise_eval_error */
 
 /**
  * Raise a RangeError with the given message.
@@ -184,7 +184,7 @@ ecma_completion_value_t
 ecma_raise_range_error (const ecma_char_t *msg_p) /**< error message */
 {
   return ecma_raise_standard_error (ECMA_ERROR_RANGE, msg_p);
-}
+} /* ecma_raise_range_error */
 
 /**
  * Raise a ReferenceError with the given message.
@@ -198,7 +198,7 @@ ecma_completion_value_t
 ecma_raise_reference_error (const ecma_char_t *msg_p) /**< error message */
 {
   return ecma_raise_standard_error (ECMA_ERROR_REFERENCE, msg_p);
-}
+} /* ecma_raise_reference_error */
 
 /**
  * Raise a SyntaxError with the given message.
@@ -212,7 +212,7 @@ ecma_completion_value_t
 ecma_raise_syntax_error (const ecma_char_t *msg_p) /**< error message */
 {
   return ecma_raise_standard_error (ECMA_ERROR_SYNTAX, msg_p);
-}
+} /* ecma_raise_syntax_error */
 
 /**
  * Raise a TypeError with the given message.
@@ -226,7 +226,7 @@ ecma_completion_value_t
 ecma_raise_type_error (const ecma_char_t *msg_p) /**< error message */
 {
   return ecma_raise_standard_error (ECMA_ERROR_TYPE, msg_p);
-}
+} /* ecma_raise_type_error */
 
 /**
  * Raise a URIError with the given message.
@@ -240,7 +240,7 @@ ecma_completion_value_t
 ecma_raise_uri_error (const ecma_char_t *msg_p) /**< error message */
 {
   return ecma_raise_standard_error (ECMA_ERROR_URI, msg_p);
-}
+} /* ecma_raise_uri_error */
 
 /**
  * @}

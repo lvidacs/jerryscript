@@ -23,7 +23,8 @@
 #include "re-parser.h"
 
 /* RegExp opcodes
- * Group opcode order is important, because IS_CAPTURE_GROUP is based on it. Do not change it!
+ * Group opcode order is important, because RE_IS_CAPTURE_GROUP is based on it.
+ * Change it carfully. Capture opcodes should be at first.
  */
 #define RE_OP_EOF                                           0
 
@@ -58,11 +59,12 @@
 
 #define RE_COMPILE_RECURSION_LIMIT  100
 
-#define IS_CAPTURE_GROUP(x) (((x) < RE_OP_NON_CAPTURE_GROUP_START) ? 1 : 0)
+#define RE_IS_CAPTURE_GROUP(x) (((x) < RE_OP_NON_CAPTURE_GROUP_START) ? 1 : 0)
 
-typedef uint8_t re_opcode_t;
-typedef uint8_t re_bytecode_t;
+typedef uint8_t re_opcode_t; /* type of RegExp opcodes */
+typedef uint8_t re_bytecode_t; /* type of standard bytecode elements (ex.: opcode parameters) */
 
+/* represents the context of RegExp bytecode container */
 typedef struct
 {
   re_bytecode_t *block_start_p;
@@ -70,6 +72,7 @@ typedef struct
   re_bytecode_t *current_p;
 } re_bytecode_ctx_t;
 
+/* represents the context of RegExp compiler */
 typedef struct
 {
   uint8_t flags;
@@ -83,13 +86,13 @@ typedef struct
 } re_compiler_ctx_t;
 
 ecma_completion_value_t
-regexp_compile_bytecode (ecma_property_t *bytecode_p, ecma_string_t *pattern_str_p, uint8_t flags);
+re_compile_bytecode (ecma_property_t *bytecode_p, ecma_string_t *pattern_str_p, uint8_t flags);
 
 re_opcode_t
-get_opcode (re_bytecode_t **bc_p);
+re_get_opcode (re_bytecode_t **bc_p);
 
 uint32_t
-get_value (re_bytecode_t **bc_p);
+re_get_value (re_bytecode_t **bc_p);
 
 #endif /* CONFIG_ECMA_COMPACT_PROFILE_DISABLE_REGEXP_BUILTIN */
 #endif /* RE_COMPILER_H */

@@ -24,12 +24,16 @@
 
 #ifndef CONFIG_ECMA_COMPACT_PROFILE_DISABLE_REGEXP_BUILTIN
 
-#define RE_LOOKUP(str_p, lookup)  *(str_p + lookup)
+/* FIXME: change it, when unicode support would be implemented  */
+#define RE_LOOKUP(str_p, lookup)  (ecma_zt_string_length (str_p) > lookup ? str_p[lookup] : '\0')
+
+/* FIXME: change it, when unicode support would be implemented  */
 #define RE_ADVANCE(str_p, advance) do { str_p += advance; } while (0)
 
 static ecma_char_t
 get_ecma_char (ecma_char_t** char_p)
 {
+  /* FIXME: change to string iterator with unicode support, when it would be implemented */
   ecma_char_t ch = **char_p;
   RE_ADVANCE (*char_p, 1);
   return ch;
@@ -120,7 +124,7 @@ parse_re_iterator (ecma_char_t *pattern_p, /**< RegExp pattern */
             return ret_value;
           }
           digits++;
-          qmin = qmin * 10 + hex_to_int ((char) ch1);
+          qmin = qmin * 10 + ecma_char_hex_to_int ((char) ch1);
         }
         else if (ch1 == ',')
         {
@@ -214,21 +218,21 @@ parse_re_iterator (ecma_char_t *pattern_p, /**< RegExp pattern */
 static void
 re_count_num_of_groups (re_parser_ctx_t *parser_ctx_p) /**< RegExp parser context */
 {
-  ecma_char_t **pattern_p = &(parser_ctx_p->pattern_start_p);
+  ecma_char_t *pattern_p = parser_ctx_p->pattern_start_p;
   ecma_char_t ch1;
   int char_class_in = 0;
   parser_ctx_p->num_of_groups = 0;
 
-  ch1 = get_ecma_char (pattern_p);
+  ch1 = get_ecma_char (&pattern_p);
   while (ch1 != '\0')
   {
     ecma_char_t ch0 = ch1;
-    ch1 = get_ecma_char (pattern_p);
+    ch1 = get_ecma_char (&pattern_p);
     switch (ch0)
     {
       case '\\':
       {
-        ch1 = get_ecma_char (pattern_p);
+        ch1 = get_ecma_char (&pattern_p);
         break;
       }
       case '[':
@@ -671,7 +675,7 @@ re_parse_next_token (re_parser_ctx_t *parser_ctx_p, /**< RegExp parser context *
               {
                 break;
               }
-              number = number * 10 + hex_to_int ((char) digit);
+              number = number * 10 + ecma_char_hex_to_int ((char) digit);
               index++;
             }
             while (true);

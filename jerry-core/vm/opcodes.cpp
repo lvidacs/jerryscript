@@ -719,7 +719,7 @@ opfunc_call_n (opcode_t opdata, /**< operation data */
 
   JERRY_ASSERT (!int_data->is_call_in_direct_eval_form);
 
-  opcode_t next_opcode = vm_get_opcode (int_data->opcodes_p, int_data->pos);
+  opcode_t next_opcode = vm_re_get_opcode (int_data->opcodes_p, int_data->pos);
   if (next_opcode.op_idx == __op__idx_meta
       && next_opcode.data.meta.type == OPCODE_META_TYPE_CALL_SITE_INFO)
   {
@@ -995,7 +995,7 @@ opfunc_obj_decl (opcode_t opdata, /**< operation data */
     {
       JERRY_ASSERT (ecma_is_completion_value_empty (evaluate_prop_completion));
 
-      opcode_t next_opcode = vm_get_opcode (int_data->opcodes_p, int_data->pos);
+      opcode_t next_opcode = vm_re_get_opcode (int_data->opcodes_p, int_data->pos);
       JERRY_ASSERT (next_opcode.op_idx == __op__idx_meta);
 
       const opcode_meta_type type = (opcode_meta_type) next_opcode.data.meta.type;
@@ -1403,7 +1403,7 @@ opfunc_with (opcode_t opdata, /**< operation data */
   int_data->lex_env_p = new_env_p;
 
 #ifndef JERRY_NDEBUG
-  opcode_t meta_opcode = vm_get_opcode (int_data->opcodes_p, with_end_oc);
+  opcode_t meta_opcode = vm_re_get_opcode (int_data->opcodes_p, with_end_oc);
   JERRY_ASSERT (meta_opcode.op_idx == __op__idx_meta);
   JERRY_ASSERT (meta_opcode.data.meta.type == OPCODE_META_TYPE_END_WITH);
 #endif /* !JERRY_NDEBUG */
@@ -1791,7 +1791,7 @@ opcode_counter_t
 read_meta_opcode_counter (opcode_meta_type expected_type, /**< expected type of meta opcode */
                           int_data_t *int_data) /**< interpreter context */
 {
-  opcode_t meta_opcode = vm_get_opcode (int_data->opcodes_p, int_data->pos);
+  opcode_t meta_opcode = vm_re_get_opcode (int_data->opcodes_p, int_data->pos);
   JERRY_ASSERT (meta_opcode.data.meta.type == expected_type);
 
   const idx_t data_1 = meta_opcode.data.meta.data_1;

@@ -236,7 +236,7 @@ interp_mem_stats_opcode_enter (const opcode_t *opcodes_p,
                         out_pools_stats_p,
                         true, false);
 
-  opcode_t opcode = vm_get_opcode (opcodes_p, opcode_position);
+  opcode_t opcode = vm_re_get_opcode (opcodes_p, opcode_position);
 
   printf ("%s-- Opcode: %s (position %u) --\n",
           indent_prefix, __op_names[opcode.op_idx], (uint32_t) opcode_position);
@@ -281,7 +281,7 @@ interp_mem_stats_opcode_exit (int_data_t *int_data_p,
   int_data_p->context_peak_allocated_pool_chunks = JERRY_MAX (int_data_p->context_peak_allocated_pool_chunks,
                                                               pools_stats_after.allocated_chunks);
 
-  opcode_t opcode = vm_get_opcode (int_data_p->opcodes_p, opcode_position);
+  opcode_t opcode = vm_re_get_opcode (int_data_p->opcodes_p, opcode_position);
 
   printf ("%s Allocated heap bytes:  %5u -> %5u (%+5d, local %5u, peak %5u)\n",
           indent_prefix,
@@ -584,7 +584,7 @@ vm_run_from_pos (const opcode_t *opcodes_p, /**< byte-code array */
  * Get specified opcode from the program.
  */
 opcode_t
-vm_get_opcode (const opcode_t *opcodes_p, /**< byte-code array */
+vm_re_get_opcode (const opcode_t *opcodes_p, /**< byte-code array */
                opcode_counter_t counter) /**< opcode counter */
 {
   return opcodes_p[ counter ];
@@ -599,7 +599,7 @@ opcode_scope_code_flags_t
 vm_get_scope_flags (const opcode_t *opcodes_p, /**< byte-code array */
                     opcode_counter_t counter) /**< opcode counter */
 {
-  opcode_t flags_opcode = vm_get_opcode (opcodes_p, counter);
+  opcode_t flags_opcode = vm_re_get_opcode (opcodes_p, counter);
   JERRY_ASSERT (flags_opcode.op_idx == __op__idx_meta
                 && flags_opcode.data.meta.type == OPCODE_META_TYPE_SCOPE_CODE_FLAGS);
   return (opcode_scope_code_flags_t) flags_opcode.data.meta.data_1;

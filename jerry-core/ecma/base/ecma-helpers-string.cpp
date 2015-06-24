@@ -490,7 +490,7 @@ ecma_new_ecma_string (const ecma_char_t *string_p, /**< input string */
     mem_heap_free_block (zt_str_p);
   }
 
-  ecma_string_t* string_desc_p = ecma_alloc_string ();
+  ecma_string_t *string_desc_p = ecma_alloc_string ();
   string_desc_p->refs = 1;
   string_desc_p->is_stack_var = false;
   string_desc_p->container = ECMA_STRING_CONTAINER_HEAP_CHUNKS;

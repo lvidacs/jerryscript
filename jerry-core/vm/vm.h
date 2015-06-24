@@ -31,7 +31,7 @@ extern ecma_completion_value_t vm_run_from_pos (const opcode_t *opcodes_p,
                                                 bool is_strict,
                                                 bool is_eval_code);
 
-extern opcode_t vm_get_opcode (const opcode_t*, opcode_counter_t counter);
+extern opcode_t vm_re_get_opcode (const opcode_t*, opcode_counter_t counter);
 extern opcode_scope_code_flags_t vm_get_scope_flags (const opcode_t*, opcode_counter_t counter);
 
 extern bool vm_is_strict_mode (void);

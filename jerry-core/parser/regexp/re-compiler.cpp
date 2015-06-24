@@ -166,7 +166,7 @@ insert_u32 (re_bytecode_ctx_t *bc_ctx_p, /**< RegExp bytecode context */
  * Get a RegExp opcode
  */
 re_opcode_t
-get_opcode (re_bytecode_t **bc_p) /**< pointer to bytecode start */
+re_get_opcode (re_bytecode_t **bc_p) /**< pointer to bytecode start */
 {
   re_bytecode_t bytecode = **bc_p;
   (*bc_p) += sizeof (re_bytecode_t);
@@ -177,7 +177,7 @@ get_opcode (re_bytecode_t **bc_p) /**< pointer to bytecode start */
  * Get a parameter of a RegExp opcode
  */
 uint32_t
-get_value (re_bytecode_t **bc_p) /**< pointer to bytecode start */
+re_get_value (re_bytecode_t **bc_p) /**< pointer to bytecode start */
 {
   uint32_t value = *((uint32_t*) *bc_p);
   (*bc_p) += sizeof (uint32_t);
@@ -608,7 +608,7 @@ parse_alternative (re_compiler_ctx_t *re_ctx_p, /**< RegExp compiler context */
  *         Returned value must be freed with ecma_free_completion_value
  */
 ecma_completion_value_t
-regexp_compile_bytecode (ecma_property_t *bytecode_p, /**< bytecode */
+re_compile_bytecode (ecma_property_t *bytecode_p, /**< bytecode */
                          ecma_string_t *pattern_str_p, /**< pattern */
                          uint8_t flags) /**< flags */
 {
@@ -671,7 +671,7 @@ regexp_compile_bytecode (ecma_property_t *bytecode_p, /**< bytecode */
 #endif
 
   return ret_value;
-} /* regexp_compile_bytecode */
+} /* re_compile_bytecode */
 
 #ifdef JERRY_ENABLE_LOG
 /**
@@ -681,12 +681,12 @@ void
 regexp_dump_bytecode (re_bytecode_ctx_t *bc_ctx_p)
 {
   re_bytecode_t *bytecode_p = bc_ctx_p->block_start_p;
-  JERRY_DLOG ("%d ", get_value (&bytecode_p));
-  JERRY_DLOG ("%d ", get_value (&bytecode_p));
-  JERRY_DLOG ("%d | ", get_value (&bytecode_p));
+  JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+  JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+  JERRY_DLOG ("%d | ", re_get_value (&bytecode_p));
 
   re_opcode_t op;
-  while ((op = get_opcode (&bytecode_p)))
+  while ((op = re_get_opcode (&bytecode_p)))
   {
     switch (op)
     {
@@ -698,7 +698,7 @@ regexp_dump_bytecode (re_bytecode_ctx_t *bc_ctx_p)
       case RE_OP_CHAR:
       {
         JERRY_DLOG ("CHAR ");
-        JERRY_DLOG ("%c, ", (char) get_value (&bytecode_p));
+        JERRY_DLOG ("%c, ", (char) re_get_value (&bytecode_p));
         break;
       }
       case RE_OP_CAPTURE_NON_GREEDY_ZERO_GROUP_START:
@@ -709,16 +709,16 @@ regexp_dump_bytecode (re_bytecode_ctx_t *bc_ctx_p)
       case RE_OP_CAPTURE_GREEDY_ZERO_GROUP_START:
       {
         JERRY_DLOG ("GZ_START ");
-        JERRY_DLOG ("%d ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
+        JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
         break;
       }
       case RE_OP_CAPTURE_GROUP_START:
       {
         JERRY_DLOG ("START ");
-        JERRY_DLOG ("%d ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
+        JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
         break;
       }
       case RE_OP_CAPTURE_NON_GREEDY_GROUP_END:
@@ -729,10 +729,10 @@ regexp_dump_bytecode (re_bytecode_ctx_t *bc_ctx_p)
       case RE_OP_CAPTURE_GREEDY_GROUP_END:
       {
         JERRY_DLOG ("G_END ");
-        JERRY_DLOG ("%d ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
+        JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
         break;
       }
       case RE_OP_NON_CAPTURE_NON_GREEDY_ZERO_GROUP_START:
@@ -743,16 +743,16 @@ regexp_dump_bytecode (re_bytecode_ctx_t *bc_ctx_p)
       case RE_OP_NON_CAPTURE_GREEDY_ZERO_GROUP_START:
       {
         JERRY_DLOG ("GZ_NC_START ");
-        JERRY_DLOG ("%d ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
+        JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
         break;
       }
       case RE_OP_NON_CAPTURE_GROUP_START:
       {
         JERRY_DLOG ("NC_START ");
-        JERRY_DLOG ("%d ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
+        JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
         break;
       }
       case RE_OP_NON_CAPTURE_NON_GREEDY_GROUP_END:
@@ -763,16 +763,16 @@ regexp_dump_bytecode (re_bytecode_ctx_t *bc_ctx_p)
       case RE_OP_NON_CAPTURE_GREEDY_GROUP_END:
       {
         JERRY_DLOG ("G_NC_END ");
-        JERRY_DLOG ("%d ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
+        JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
         break;
       }
       case RE_OP_SAVE_AT_START:
       {
         JERRY_DLOG ("RE_START ");
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
         break;
       }
       case RE_OP_SAVE_AND_MATCH:
@@ -783,17 +783,17 @@ regexp_dump_bytecode (re_bytecode_ctx_t *bc_ctx_p)
       case RE_OP_GREEDY_ITERATOR:
       {
         JERRY_DLOG ("GREEDY_ITERATOR ");
-        JERRY_DLOG ("%d ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
+        JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
         break;
       }
       case RE_OP_NON_GREEDY_ITERATOR:
       {
         JERRY_DLOG ("NON_GREEDY_ITERATOR ");
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
         break;
       }
       case RE_OP_PERIOD:
@@ -804,7 +804,7 @@ regexp_dump_bytecode (re_bytecode_ctx_t *bc_ctx_p)
       case RE_OP_ALTERNATIVE:
       {
         JERRY_DLOG ("ALTERNATIVE ");
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
         break;
       }
       case RE_OP_ASSERT_START:
@@ -830,19 +830,19 @@ regexp_dump_bytecode (re_bytecode_ctx_t *bc_ctx_p)
       case RE_OP_LOOKAHEAD_POS:
       {
         JERRY_DLOG ("LOOKAHEAD_POS ");
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
         break;
       }
       case RE_OP_LOOKAHEAD_NEG:
       {
         JERRY_DLOG ("LOOKAHEAD_NEG ");
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
         break;
       }
       case RE_OP_BACKREFERENCE:
       {
         JERRY_DLOG ("BACKREFERENCE ");
-        JERRY_DLOG ("%d, ", get_value (&bytecode_p));
+        JERRY_DLOG ("%d, ", re_get_value (&bytecode_p));
         break;
       }
       case RE_OP_INV_CHAR_CLASS:
@@ -853,12 +853,12 @@ regexp_dump_bytecode (re_bytecode_ctx_t *bc_ctx_p)
       case RE_OP_CHAR_CLASS:
       {
         JERRY_DLOG ("CHAR_CLASS ");
-        uint32_t num_of_class = get_value (&bytecode_p);
+        uint32_t num_of_class = re_get_value (&bytecode_p);
         JERRY_DLOG ("%d", num_of_class);
         while (num_of_class)
         {
-          JERRY_DLOG (" %d", get_value (&bytecode_p));
-          JERRY_DLOG ("-%d", get_value (&bytecode_p));
+          JERRY_DLOG (" %d", re_get_value (&bytecode_p));
+          JERRY_DLOG ("-%d", re_get_value (&bytecode_p));
           num_of_class--;
         }
         JERRY_DLOG (", ");

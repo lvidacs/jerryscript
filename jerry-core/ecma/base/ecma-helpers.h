@@ -51,7 +51,7 @@
  */
 #define ECMA_SET_POINTER(field, non_compressed_pointer) MEM_CP_SET_POINTER (field, non_compressed_pointer)
 
-/* ecma-helpers-value.c */
+/* ecma-helpers-value.cpp */
 extern bool ecma_is_value_empty (ecma_value_t value);
 extern bool ecma_is_value_undefined (ecma_value_t value);
 extern bool ecma_is_value_null (ecma_value_t value);
@@ -109,7 +109,7 @@ extern bool ecma_is_completion_value_normal_true (ecma_completion_value_t value)
 extern bool ecma_is_completion_value_normal_false (ecma_completion_value_t value);
 extern bool ecma_is_completion_value_empty (ecma_completion_value_t value);
 
-/* ecma-helpers-string.c */
+/* ecma-helpers-string.cpp */
 extern ecma_string_t* ecma_new_ecma_string (const ecma_char_t *string_p, const ecma_length_t length);
 extern ecma_string_t* ecma_new_ecma_string (const ecma_char_t *string_p);
 extern ecma_string_t* ecma_new_ecma_string_from_uint32 (uint32_t uint_number);
@@ -162,7 +162,7 @@ extern bool ecma_is_zt_ex_string_magic (const ecma_char_t *zt_string_p, ecma_mag
 extern ecma_string_hash_t ecma_string_hash (const ecma_string_t *string_p);
 extern ecma_string_hash_t ecma_chars_buffer_calc_hash_last_chars (const ecma_char_t *chars, ecma_length_t length);
 
-/* ecma-helpers-number.c */
+/* ecma-helpers-number.cpp */
 extern const ecma_number_t ecma_number_relative_eps;
 
 extern ecma_number_t ecma_number_make_nan (void);
@@ -200,7 +200,7 @@ extern void ecma_number_to_decimal (ecma_number_t num,
                                     int32_t *out_digits_num_p,
                                     int32_t *out_decimal_exp_p);
 
-/* ecma-helpers-values-collection.c */
+/* ecma-helpers-values-collection.cpp */
 
 extern ecma_collection_header_t *ecma_new_values_collection (const ecma_value_t values_buffer[],
                                                              ecma_length_t values_number,
@@ -228,7 +228,7 @@ ecma_collection_iterator_init (ecma_collection_iterator_t *iterator_p,
 extern bool
 ecma_collection_iterator_next (ecma_collection_iterator_t *iterator_p);
 
-/* ecma-helpers.c */
+/* ecma-helpers.cpp */
 extern ecma_object_t* ecma_create_object (ecma_object_t *prototype_object_p,
                                           bool is_extensible,
                                           ecma_object_type_t type);
@@ -309,7 +309,7 @@ extern ecma_property_descriptor_t ecma_make_empty_property_descriptor (void);
 extern void ecma_free_property_descriptor (ecma_property_descriptor_t *prop_desc_p);
 extern ecma_property_descriptor_t ecma_get_property_descriptor_from_property (ecma_property_t *prop_p);
 
-/* ecma-helpers-external-pointers.c */
+/* ecma-helpers-external-pointers.cpp */
 extern bool
 ecma_create_external_pointer_property (ecma_object_t *obj_p,
                                        ecma_internal_property_id_t id,
@@ -329,13 +329,13 @@ extern int32_t ecma_number_to_int32 (ecma_number_t value);
 extern ecma_number_t ecma_int32_to_number (int32_t value);
 extern ecma_number_t ecma_uint32_to_number (uint32_t value);
 extern ecma_length_t ecma_number_to_zt_string (ecma_number_t num, ecma_char_t *buffer_p, ssize_t buffer_size);
-extern uint32_t hex_to_int (char hex);
 
 /* ecma-helpers-char.cpp */
 extern bool ecma_char_is_new_line (ecma_char_t c);
 extern bool ecma_char_is_carriage_return (ecma_char_t c);
 extern bool ecma_char_is_line_terminator (ecma_char_t c);
 extern bool ecma_char_is_word_char (ecma_char_t c);
+extern uint32_t ecma_char_hex_to_int (char hex);
 
 #endif /* !JERRY_ECMA_HELPERS_H */
 

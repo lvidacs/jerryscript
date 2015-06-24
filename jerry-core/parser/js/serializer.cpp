@@ -39,7 +39,7 @@ serializer_get_op_meta (opcode_counter_t oc)
  * @return byte-code instruction
  */
 opcode_t
-serializer_get_opcode (const opcode_t *opcodes_p, /**< pointer to byte-code array (or NULL,
+serializer_re_get_opcode (const opcode_t *opcodes_p, /**< pointer to byte-code array (or NULL,
                                                    *   if instruction should be taken from
                                                    *   instruction list of current scope) */
                        opcode_counter_t oc) /**< opcode counter of the intruction */
