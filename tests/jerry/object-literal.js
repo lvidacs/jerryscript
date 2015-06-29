@@ -90,3 +90,11 @@ a.q;
 a.q = 1;
 
 assert (flow == 'get: undefined, set: undefined');
+
+str = 's = {';
+for (i = 0; i < 300; i++)
+{
+  str += ' ' + i + ' : "' + i + '", ';
+}
+str += '}';
+eval (str);
