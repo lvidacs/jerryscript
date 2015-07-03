@@ -253,6 +253,93 @@ lit_char_is_unicode_connector_punctuation (ecma_char_t c) /**< code unit */
 } /* lit_char_is_unicode_connector_punctuation */
 
 /**
+ * Check if specified character is one of OctalDigit characters (ECMA-262 v5, B.1.2)
+ *
+ * @return true / false
+ */
+bool
+lit_char_is_octal_digit (ecma_char_t c) /**< code unit */
+{
+  if (c >= LIT_CHAR_ASCII_OCTAL_DIGITS_BEGIN && c <= LIT_CHAR_ASCII_OCTAL_DIGITS_END)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+} /* lit_char_is_octal_digit */
+
+/**
+ * Check if specified character is one of DecimalDigit characters (ECMA-262 v5, 7.8.3)
+ *
+ * @return true / false
+ */
+bool
+lit_char_is_decimal_digit (ecma_char_t c) /**< code unit */
+{
+  if (c >= LIT_CHAR_ASCII_DIGITS_BEGIN && c <= LIT_CHAR_ASCII_DIGITS_END)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+} /* lit_char_is_decimal_digit */
+
+/**
+ * Check if specified character is one of HexDigit characters (ECMA-262 v5, 7.8.3)
+ *
+ * @return true / false
+ */
+bool
+lit_char_is_hex_digit (ecma_char_t c) /**< code unit */
+{
+  if (c >= LIT_CHAR_ASCII_DIGITS_BEGIN && c <= LIT_CHAR_ASCII_DIGITS_END)
+  {
+    return true;
+  }
+  else if (c >= LIT_CHAR_ASCII_LOWERCASE_LETTERS_HEX_BEGIN && c <= LIT_CHAR_ASCII_LOWERCASE_LETTERS_HEX_END)
+  {
+    return true;
+  }
+  else if (c >= LIT_CHAR_ASCII_UPPERCASE_LETTERS_HEX_BEGIN && c <= LIT_CHAR_ASCII_UPPERCASE_LETTERS_HEX_END)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+} /* lit_char_is_hex_digit */
+
+/**
+ * Convert a HexDigit character to its numeric value, as defined in ECMA-262 v5, 7.8.3
+ *
+ * @return digit value, corresponding to the hex char
+ */
+uint32_t
+lit_char_hex_to_int (ecma_char_t c) /**< code unit, corresponding to
+                                     *    one of HexDigit characters */
+{
+  JERRY_ASSERT (lit_char_is_hex_digit (c));
+
+  if (c >= LIT_CHAR_ASCII_DIGITS_BEGIN && c <= LIT_CHAR_ASCII_DIGITS_END)
+  {
+    return (uint32_t) (c - LIT_CHAR_ASCII_DIGITS_BEGIN);
+  }
+  else if (c >= LIT_CHAR_ASCII_LOWERCASE_LETTERS_HEX_BEGIN && c <= LIT_CHAR_ASCII_LOWERCASE_LETTERS_HEX_END)
+  {
+    return (uint32_t) (c - LIT_CHAR_ASCII_LOWERCASE_LETTERS_HEX_BEGIN + 10);
+  }
+  else
+  {
+    return (uint32_t) (c - LIT_CHAR_ASCII_UPPERCASE_LETTERS_HEX_BEGIN + 10);
+  }
+} /* lit_char_hex_to_int */
+
+/**
  * Check if specified character is a word character (part of IsWordChar abstract operation)
  *
  * See also: ECMA-262 v5, 15.10.2.6 (IsWordChar)
@@ -273,28 +360,3 @@ lit_char_is_word_char (ecma_char_t c) /**< code unit */
 
   return false;
 } /* lit_char_is_word_char */
-
-/**
- * Convert a hex character to an unsigned integer
- *
- * @return digit value, corresponding to the hex char
- */
-uint32_t
-lit_char_hex_to_int (ecma_char_t c) /**< code unit, corresponding to
-                                     *    one of [0-9A-Fa-f] characters */
-{
-  if (c >= LIT_CHAR_ASCII_DIGITS_BEGIN && c <= LIT_CHAR_ASCII_DIGITS_END)
-  {
-    return (uint32_t) (c - LIT_CHAR_ASCII_DIGITS_BEGIN);
-  }
-  else if (c >= LIT_CHAR_ASCII_LOWERCASE_LETTERS_HEX_BEGIN && c <= LIT_CHAR_ASCII_LOWERCASE_LETTERS_HEX_END)
-  {
-    return (uint32_t) (c - LIT_CHAR_ASCII_LOWERCASE_LETTERS_HEX_BEGIN + 10);
-  }
-  else
-  {
-    JERRY_ASSERT (c >= LIT_CHAR_ASCII_UPPERCASE_LETTERS_HEX_BEGIN && c <= LIT_CHAR_ASCII_UPPERCASE_LETTERS_HEX_END);
-
-    return (uint32_t) (c - LIT_CHAR_ASCII_UPPERCASE_LETTERS_HEX_BEGIN + 10);
-  }
-} /* lit_char_hex_to_int */
