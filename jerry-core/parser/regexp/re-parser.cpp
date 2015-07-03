@@ -118,7 +118,7 @@ parse_re_iterator (lit_utf8_byte_t *pattern_p, /**< RegExp pattern */
         (*advance_p)++;
         ch1 = RE_LOOKUP (pattern_p, lookup + *advance_p);
 
-        if (isdigit (ch1))
+        if (lit_char_is_decimal_digit (ch1))
         {
           if (digits >= ECMA_NUMBER_MAX_DIGITS)
           {
@@ -414,9 +414,10 @@ re_parse_char_class (re_parser_ctx_t *parser_ctx_p, /**< number of classes */
         append_char_class (re_ctx_p, 0x007BUL, 0xFFFFUL);
         ch = RE_CHAR_UNDEF;
       }
-      else if (isdigit (ch))
+      else if (lit_char_is_decimal_digit (ch))
       {
-        if (ch != '\0' || isdigit (RE_LOOKUP (*pattern_p, 1)))
+        if (ch != LIT_CHAR_0
+            || lit_char_is_decimal_digit (RE_LOOKUP (*pattern_p, 1)))
         {
           /* FIXME: octal support */
         }
@@ -587,8 +588,8 @@ re_parse_next_token (re_parser_ctx_t *parser_ctx_p, /**< RegExp parser context *
         }
       }
       else if (ch1 == 'x'
-               && isxdigit (RE_LOOKUP (parser_ctx_p->current_char_p, 2))
-               && isxdigit (RE_LOOKUP (parser_ctx_p->current_char_p, 3)))
+               && lit_char_is_hex_digit (RE_LOOKUP (parser_ctx_p->current_char_p, 2))
+               && lit_char_is_hex_digit (RE_LOOKUP (parser_ctx_p->current_char_p, 3)))
       {
         advance = 4;
         out_token_p->type = RE_TOK_CHAR;
@@ -596,10 +597,10 @@ re_parse_next_token (re_parser_ctx_t *parser_ctx_p, /**< RegExp parser context *
         /* result.value = ...; */
       }
       else if (ch1 == 'u'
-               && isxdigit (RE_LOOKUP (parser_ctx_p->current_char_p, 2))
-               && isxdigit (RE_LOOKUP (parser_ctx_p->current_char_p, 3))
-               && isxdigit (RE_LOOKUP (parser_ctx_p->current_char_p, 4))
-               && isxdigit (RE_LOOKUP (parser_ctx_p->current_char_p, 5)))
+               && lit_char_is_hex_digit (RE_LOOKUP (parser_ctx_p->current_char_p, 2))
+               && lit_char_is_hex_digit (RE_LOOKUP (parser_ctx_p->current_char_p, 3))
+               && lit_char_is_hex_digit (RE_LOOKUP (parser_ctx_p->current_char_p, 4))
+               && lit_char_is_hex_digit (RE_LOOKUP (parser_ctx_p->current_char_p, 5)))
       {
         advance = 4;
         out_token_p->type = RE_TOK_CHAR;
@@ -636,11 +637,11 @@ re_parse_next_token (re_parser_ctx_t *parser_ctx_p, /**< RegExp parser context *
         advance = 2;
         out_token_p->type = RE_TOK_NOT_WORD_CHAR;
       }
-      else if (isdigit (ch1))
+      else if (lit_char_is_decimal_digit (ch1))
       {
         if (ch1 == '0')
         {
-          if (isdigit (RE_LOOKUP (parser_ctx_p->current_char_p, 2)))
+          if (lit_char_is_decimal_digit (RE_LOOKUP (parser_ctx_p->current_char_p, 2)))
           {
             ret_value = ecma_raise_syntax_error ("RegExp escape pattern error.");
             break;
@@ -673,7 +674,7 @@ re_parse_next_token (re_parser_ctx_t *parser_ctx_p, /**< RegExp parser context *
               advance++;
               ecma_char_t digit = RE_LOOKUP (parser_ctx_p->current_char_p,
                                              advance);
-              if (!isdigit (digit))
+              if (!lit_char_is_decimal_digit (digit))
               {
                 break;
               }
