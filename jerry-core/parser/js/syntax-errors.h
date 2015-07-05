@@ -23,7 +23,7 @@
 #ifndef JERRY_NDEBUG
 #define PARSE_ERROR_PRINT_PLACE(TYPE, LOCUS) do { \
   size_t line, column; \
-  lexer_locus_to_line_and_column ((locus) (LOCUS), &line, &column); \
+  lexer_locus_to_line_and_column ((LOCUS), &line, &column); \
   lexer_dump_line (line); \
   printf ("\n"); \
   for (size_t i = 0; i < column; i++) { \
