@@ -25,6 +25,7 @@
 #include "ecma-try-catch-macro.h"
 #include "jrt.h"
 #include "lit-magic-strings.h"
+#include "lit-strings.h"
 #include "vm.h"
 #include "jrt-libc-includes.h"
 
@@ -598,7 +599,11 @@ ecma_builtin_global_object_decode_uri_helper (ecma_value_t uri __attr_unused___,
 
   while (input_char_p < input_end_p)
   {
-    /* Input validation. */
+    /*
+     * We expect that the input is a valid UTF-8 sequence,
+     * so characters >= 0x80 can be let through.
+     */
+
     if (*input_char_p != '%')
     {
       output_size++;
@@ -615,7 +620,7 @@ ecma_builtin_global_object_decode_uri_helper (ecma_value_t uri __attr_unused___,
 
     input_char_p += 3;
 
-    if (decoded_byte <= 0x7f)
+    if (decoded_byte <= LIT_UTF8_1_BYTE_CODE_POINT_MAX)
     {
       /*
        * We don't decode those bytes, which are part of reserved_uri_bitset
@@ -631,7 +636,7 @@ ecma_builtin_global_object_decode_uri_helper (ecma_value_t uri __attr_unused___,
         output_size++;
       }
     }
-    else if (decoded_byte < 0xc0 || decoded_byte >= 0xf8)
+    else if (decoded_byte < LIT_UTF8_2_BYTE_MARKER || decoded_byte >= LIT_UTF8_FIRST_BYTE_MAX)
     {
       /*
        * Invalid UTF-8 starting bytes:
@@ -647,23 +652,23 @@ ecma_builtin_global_object_decode_uri_helper (ecma_value_t uri __attr_unused___,
       uint32_t min;
       uint32_t character;
 
-      if (decoded_byte < 0xe0)
+      if (decoded_byte < LIT_UTF8_2_BYTE_MASK)
       {
         count = 1;
-        min = 0x80;
-        character = decoded_byte & 0x1f;
+        min = LIT_UTF8_2_BYTE_CODE_POINT_MIN;
+        character = decoded_byte & LIT_UTF8_LAST_5_BITS_MASK;
       }
-      else if (decoded_byte < 0xf0)
+      else if (decoded_byte < LIT_UTF8_3_BYTE_MASK)
       {
         count = 2;
-        min = 0x800;
-        character = decoded_byte & 0x0f;
+        min = LIT_UTF8_3_BYTE_CODE_POINT_MIN;
+        character = decoded_byte & LIT_UTF8_LAST_4_BITS_MASK;
       }
       else
       {
         count = 3;
-        min = 0x1000;
-        character = decoded_byte & 0x07;
+        min = LIT_UTF8_4_BYTE_CODE_POINT_MIN;
+        character = decoded_byte & LIT_UTF8_LAST_3_BITS_MASK;
       }
 
       output_size += (count + 1);
@@ -672,12 +677,12 @@ ecma_builtin_global_object_decode_uri_helper (ecma_value_t uri __attr_unused___,
       {
         decoded_byte = ecma_builtin_global_object_hex_to_byte (input_char_p);
         if (decoded_byte == ECMA_BUILTIN_HEX_TO_BYTE_ERROR
-            || (decoded_byte & 0xc0) != 0x80)
+            || (decoded_byte & LIT_UTF8_EXTRA_BYTE_MASK) != LIT_UTF8_EXTRA_BYTE_MARKER)
         {
           break;
         }
 
-        character = (character << 6) + (decoded_byte & 0x3f);
+        character = (character << LIT_UTF8_BITS_IN_EXTRA_BYTES) + (decoded_byte & LIT_UTF8_LAST_6_BITS_MASK);
         input_char_p += 3;
       }
       while (--count > 0);
@@ -693,8 +698,8 @@ ecma_builtin_global_object_decode_uri_helper (ecma_value_t uri __attr_unused___,
           /*
            * Not allowed character ranges.
            */
-          || character > 0x10ffff
-          || (character >= 0xd800 && character <= 0xdfff))
+          || character > LIT_UNICODE_CODE_POINT_MAX
+          || (character >= LIT_UTF16_HIGH_SURROGATE_MIN && character <= LIT_UTF16_LOW_SURROGATE_MAX))
       {
         ret_value = ecma_make_throw_obj_completion_value (ecma_new_standard_error (ECMA_ERROR_URI));
         break;
@@ -725,7 +730,7 @@ ecma_builtin_global_object_decode_uri_helper (ecma_value_t uri __attr_unused___,
       uint32_t decoded_byte = ecma_builtin_global_object_hex_to_byte (input_char_p);
       input_char_p += 3;
 
-      if (decoded_byte <= 0x7f)
+      if (decoded_byte <= LIT_UTF8_1_BYTE_CODE_POINT_MAX)
       {
         if (ecma_builtin_global_object_character_is_in (decoded_byte, reserved_uri_bitset)
             && !ecma_builtin_global_object_character_is_in (decoded_byte, unescaped_uri_component_set))
@@ -743,38 +748,34 @@ ecma_builtin_global_object_decode_uri_helper (ecma_value_t uri __attr_unused___,
       else
       {
         uint32_t count;
-        uint32_t character;
 
         /* The validator already checked this before. */
-        JERRY_ASSERT (decoded_byte >= 0xc0 && decoded_byte < 0xf8);
+        JERRY_ASSERT (decoded_byte >= LIT_UTF8_2_BYTE_MARKER && decoded_byte < LIT_UTF8_FIRST_BYTE_MAX);
 
-        if (decoded_byte < 0xe0)
+        if (decoded_byte < LIT_UTF8_2_BYTE_MASK)
         {
           count = 1;
-          character = decoded_byte & 0x1f;
         }
-        else if (decoded_byte < 0xf0)
+        else if (decoded_byte < LIT_UTF8_3_BYTE_MASK)
         {
           count = 2;
-          character = decoded_byte & 0x0f;
         }
         else
         {
           count = 3;
-          character = decoded_byte & 0x07;
         }
+        *output_char_p++ = (lit_utf8_byte_t) decoded_byte;
 
         do
         {
           decoded_byte = ecma_builtin_global_object_hex_to_byte (input_char_p);
+          /* The validator already checked this before. */
           JERRY_ASSERT (decoded_byte != ECMA_BUILTIN_HEX_TO_BYTE_ERROR
-                        && (decoded_byte & 0xc0) == 0x80);
-          character = (character << 6) + (decoded_byte & 0x3f);
+                        && (decoded_byte & LIT_UTF8_EXTRA_BYTE_MASK) == LIT_UTF8_EXTRA_BYTE_MARKER);
+          *output_char_p++ = (lit_utf8_byte_t) decoded_byte;
           input_char_p += 3;
         }
         while (--count > 0);
-
-        output_char_p += lit_code_point_to_utf8 (character, output_char_p);
       }
     }
 
@@ -864,10 +865,8 @@ ecma_builtin_global_object_encode_uri_helper (ecma_value_t uri, /**< uri argumen
   lit_utf8_size_t input_size = ecma_string_get_size (input_string_p);
 
   MEM_DEFINE_LOCAL_ARRAY (input_start_p,
-                          input_size + 1,
+                          input_size,
                           lit_utf8_byte_t);
-
-  input_start_p[input_size] = LIT_BYTE_NULL;
 
   ecma_string_to_utf8_string (input_string_p,
                               input_start_p,
@@ -878,16 +877,21 @@ ecma_builtin_global_object_encode_uri_helper (ecma_value_t uri, /**< uri argumen
    * and compute the length of the output, then we encode the input.
    */
 
-  lit_utf8_iterator_t iter = lit_utf8_iterator_create (input_start_p, input_size);
-  lit_utf8_size_t output_length = 1;
-  while (!lit_utf8_iterator_is_eos (&iter))
-  {
-    /* Input validation. */
-    lit_code_point_t character = lit_utf8_iterator_read_next (&iter);
+  lit_utf8_byte_t *input_char_p = input_start_p;
+  lit_utf8_byte_t *input_end_p = input_start_p + input_size;
+  lit_utf8_size_t output_length = 0;
 
-    if (character <= 0x7f)
+  while (input_char_p < input_end_p)
+  {
+    /*
+     * We expect that the input is a valid UTF-8 sequence,
+     * so we only need to reject stray surrogate pairs.
+     */
+
+    /* Input validation. */
+    if (*input_char_p <= LIT_UTF8_1_BYTE_CODE_POINT_MAX)
     {
-      if (ecma_builtin_global_object_character_is_in (character, unescaped_uri_bitset))
+      if (ecma_builtin_global_object_character_is_in (*input_char_p, unescaped_uri_bitset))
       {
         output_length++;
       }
@@ -896,31 +900,28 @@ ecma_builtin_global_object_encode_uri_helper (ecma_value_t uri, /**< uri argumen
         output_length += 3;
       }
     }
-    else if (character <= 0x7ff)
+    else if (*input_char_p == (LIT_UTF8_3_BYTE_MARKER + (LIT_UTF16_HIGH_SURROGATE_MARKER >> 12)))
     {
-      output_length += 6;
-    }
-    else if (character <= 0xffff)
-    {
-      if (character >= 0xd800 && character <= 0xdfff)
+      /* The next character is in the [0xd000, 0xdfff] range. */
+      output_length += 3;
+      input_char_p++;
+      JERRY_ASSERT (input_char_p < input_end_p);
+      JERRY_ASSERT ((*input_char_p & LIT_UTF8_EXTRA_BYTE_MASK) == LIT_UTF8_EXTRA_BYTE_MARKER);
+
+      /* If this condition is true, the next character is >= LIT_UTF16_HIGH_SURROGATE_MIN. */
+      if (*input_char_p & 0x20)
       {
         ret_value = ecma_make_throw_obj_completion_value (ecma_new_standard_error (ECMA_ERROR_URI));
         break;
       }
-      else
-      {
-        output_length += 9;
-      }
-    }
-    else if (character <= 0x10ffff)
-    {
-      output_length += 12;
+      output_length += 3;
     }
     else
     {
-      ret_value = ecma_make_throw_obj_completion_value (ecma_new_standard_error (ECMA_ERROR_URI));
-      break;
+      output_length += 3;
     }
+
+    input_char_p++;
   }
 
   if (ecma_is_completion_value_empty (ret_value))
@@ -929,58 +930,37 @@ ecma_builtin_global_object_encode_uri_helper (ecma_value_t uri, /**< uri argumen
                             output_length,
                             lit_utf8_byte_t);
 
-    lit_utf8_iterator_t iter = lit_utf8_iterator_create (input_start_p, input_size);
     lit_utf8_byte_t *output_char_p = output_start_p;
-    while (!lit_utf8_iterator_is_eos (&iter))
+    input_char_p = input_start_p;
+
+    while (input_char_p < input_end_p)
     {
       /* Input decode. */
-      lit_code_point_t character = lit_utf8_iterator_read_next (&iter);
 
-      if (character <= 0x7f)
+      if (*input_char_p <= LIT_UTF8_1_BYTE_CODE_POINT_MAX)
       {
-        if (ecma_builtin_global_object_character_is_in (character, unescaped_uri_bitset))
+        if (ecma_builtin_global_object_character_is_in (*input_char_p, unescaped_uri_bitset))
         {
-          *output_char_p++ = (lit_utf8_byte_t) character;
+          *output_char_p++ = *input_char_p;
         }
         else
         {
-          ecma_builtin_global_object_byte_to_hex (output_char_p, character);
+          ecma_builtin_global_object_byte_to_hex (output_char_p, *input_char_p);
           output_char_p += 3;
         }
       }
-      else if (character <= 0x7ff)
-      {
-        ecma_builtin_global_object_byte_to_hex (output_char_p, 0xc0 | (character >> 6));
-        output_char_p += 3;
-        ecma_builtin_global_object_byte_to_hex (output_char_p, 0x80 | (character & 0x3f));
-        output_char_p += 3;
-      }
-      else if (character <= 0xffff)
-      {
-        ecma_builtin_global_object_byte_to_hex (output_char_p, 0xe0 | (character >> 12));
-        output_char_p += 3;
-        ecma_builtin_global_object_byte_to_hex (output_char_p, 0x80 | ((character >> 6) & 0x3f));
-        output_char_p += 3;
-        ecma_builtin_global_object_byte_to_hex (output_char_p, 0x80 | (character & 0x3f));
-        output_char_p += 3;
-      }
       else
       {
-        ecma_builtin_global_object_byte_to_hex (output_char_p, 0xf0 | (character >> 18));
-        output_char_p += 3;
-        ecma_builtin_global_object_byte_to_hex (output_char_p, 0x80 | ((character >> 12) & 0x3f));
-        output_char_p += 3;
-        ecma_builtin_global_object_byte_to_hex (output_char_p, 0x80 | ((character >> 6) & 0x3f));
-        output_char_p += 3;
-        ecma_builtin_global_object_byte_to_hex (output_char_p, 0x80 | (character & 0x3f));
+        ecma_builtin_global_object_byte_to_hex (output_char_p, *input_char_p);
         output_char_p += 3;
       }
+
+      input_char_p++;
     }
 
-    *output_char_p = '\0';
-    JERRY_ASSERT (output_start_p + output_length == output_char_p + 1);
+    JERRY_ASSERT (output_start_p + output_length == output_char_p);
 
-    ecma_string_t *output_string_p = ecma_new_ecma_string_from_utf8 (output_start_p, output_length - 1);
+    ecma_string_t *output_string_p = ecma_new_ecma_string_from_utf8 (output_start_p, output_length);
 
     ret_value = ecma_make_normal_completion_value (ecma_make_string_value (output_string_p));
 
